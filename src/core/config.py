@@ -12,5 +12,8 @@ class Config:
         self.EMBEDDING_MODEL = os.getenv("OLLAMA_EMBEDDING_MODEL")
         self.BASE_URL = os.getenv("BASE_URL")
         self.MISTRAL_NEMO = os.getenv("MISTRAL_NEMO")
+        self.SQL_CONN_URL = os.getenv("SQL_CONN_URL")
+        self.OLLAMA_NLP2SQL = os.getenv("OLLAMA_NLP2SQL")
+        self.GEMMA_CLOUD_MODEL = os.getenv("GEMMA_CLOUD_MODEL")
 
 config = Config()
