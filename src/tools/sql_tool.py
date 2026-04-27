@@ -4,63 +4,49 @@ from src.database import SQL_DB
 from langchain_ollama import ChatOllama
 from src.core import config
 
-class SQLToolkit:
-    """ Exposes SQL tools for orchestrator use """
+class SQLTool:
+    """
+    SQL tool class to create a toolkit for SQL database interaction.
+    Using SQLDatabaseToolkit and ChatOllama LLM.
+    """
     def __init__(self):
-        try:
-            self.db = SQL_DB.connect()
+        """ Initialize database connection and LLM """
+        self.db = SQL_DB.connect() # Initialize database connection
 
-            self.llm = ChatOllama(
-                            model= config.GEMMA_CLOUD_MODEL,
-                            temperature=0.2,
-                            # base_url=config.BASE_URL
-                        )
-            self.toolkit = SQLDatabaseToolkit(
-                db = self.db,
-                llm = self.llm
-            )
+        self.llm = ChatOllama(
+            model = config.OLLAMA_NLP2SQL,
+            temperature = 0,
+            base_url = config.BASE_URL
+        )
+        self.toolkit = None
+        self.tools = None
 
-            self.tools = {t.name:t for t in self.toolkit.get_tools()}
-
-        except Exception as e:
-            print(f"SQL-Tool Initialization Error: {e}")
-
-    def query_generator_checker(self, question:str):
+    def create_toolkit(self):
         """
-        Generate SQL from natural language and validate it.
-        Returns: generated query
+        Used to create the toolkit for SQL database interaction
         """
-        try:
-            # generate SQL directly from LLM
-            sql_query = self.llm.invoke(question).content
+        self.toolkit = SQLDatabaseToolkit(db=self.db, llm = self.llm)
+        self.tools = self.toolkit.get_tools()
 
-            # validate SQL
-            checked_query = self.tools["sql_db_query_checker"].invoke(sql_query)
-            return checked_query
-
-        except Exception as e:
-            print(f"SQL Generation Error : {e}")
-
-    def query_executor(self, sql_query:str):
+    def sql_query_tool(self):
         """
-        Execute SQL query and return results.
-        Returns: Executed SQL query
+        Used to run the toolkit for SQL database interaction
         """
-        try:
-            result = self.tools["sql_db_query"].invoke(sql_query)
+        self.create_toolkit()
+        @tool(
+            "sql_query_tool",
+            description="Converts natural language queries into SQL and executes them on the connected database."
+        )
+        def run_sql_query(query:str):
+            """
+            Run a natural language query against the database.
+            Converts the query to SQL and returns the results
+            """
+            self.create_toolkit()
+            sql_tools = self.tools[0]
+            result = sql_tools.invoke(query)
             return result
-        except Exception as e:
-            print(f"SQL Execution Error : {e}")
+        return run_sql_query
 
-    def get_tool(self):
-        """
-        Wrapper method for SQL tool named query_tool.
-        Returns: langchain SQL tool
-        """
-        @tool("query_tool", description="Generate, validate, and execute SQL queries from NLP question.")
-        def query_tool(question:str) -> str:
-            checked_query = self.query_generator_checker(question)
-            return self.query_executor(checked_query)
-        return query_tool
-
-sql_toolkit = SQLToolkit().get_tool()
+sql_tool_obj = SQLTool()
+sql_toolkit = sql_tool_obj.sql_query_tool()
