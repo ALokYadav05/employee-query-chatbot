@@ -40,5 +40,3 @@ class SQLDatabaseConn:
             print(f"Dispose Error: {e}")
 
 SQL_DB = SQLDatabaseConn()
-SQL_DB.connect()
-SQL_DB.dispose()
