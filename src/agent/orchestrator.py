@@ -6,21 +6,22 @@ from langchain.agents import create_agent
 
 class OrchestratorAgent:
     """
-    Orchestrator Agent
+    Orchestrator Agent that uses Language model with SQL and RAG tools
+    to answer employee related queries
     """
     def __init__(self):
+        """ Initialize the agent with model and system prompt."""
         self.llm = ChatOllama(
-                            model = config.GEMMA_CLOUD_MODEL,
-                            temperature=0.2,
-                            # base_url=config.BASE_URL,
+                            model = config.MISTRAL_NEMO,
+                            temperature=0.3,
+                            base_url=config.BASE_URL
                             )
-        self.BASE_URL = config.BASE_URL
         self.prompt = prompt_loader.load_prompt()
         self.agent = None
 
     def create_agent(self):
         """
-        Creates an Orchestrator Agent
+        Create the agent with tools and system prompt.
         """
         try:
             self.agent = create_agent(
@@ -33,7 +34,7 @@ class OrchestratorAgent:
 
     def run_query(self, query : str):
         """
-        stream agent response for a given query
+        Run a user query and stream the agent's response.
         """
         try:
             for event in self.agent.stream(
@@ -48,4 +49,4 @@ class OrchestratorAgent:
 if __name__ == "__main__":
     agent = OrchestratorAgent()
     agent.create_agent()
-    agent.run_query("Who is AI department Manager?")
+    agent.run_query("Give me the names of employee with highest salary in each department")
