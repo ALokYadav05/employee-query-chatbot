@@ -8,7 +8,7 @@ class PromptLoader:
     def __init__(self):
         self.file_path = f"{config.BASE_DIR}/src/prompts/system_prompt.md"
 
-    def load_prompt(self) -> str:
+    def load_prompt(self) -> str | None:
         """
         Loads system prompt from Markdown file.
         Return: system prompt as string
