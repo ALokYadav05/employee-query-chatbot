@@ -2,10 +2,11 @@ from langchain_chroma import Chroma
 from langchain_ollama import OllamaEmbeddings
 from src.core import config
 from langchain.tools import tool
+import logging
+
 
 class RagTool:
     def __init__(self):
-        self.logger = config.logger
         try:
             self.base_dir = config.BASE_DIR
             self.embeddings_model = config.EMBEDDING_MODEL
@@ -22,9 +23,9 @@ class RagTool:
                 persist_directory=f"{self.base_dir}/chromaDB",
             )
 
-            self.logger.info("RAGTool initialized successfully with Chroma vector store.")
+            logging.info("RAGTool initialized successfully with Chroma vector store.")
         except Exception as e:
-            self.logger.error(f"Error initializing RAGTool: {e}", exc_info=True)
+            logging.error(f"Error initializing RAGTool: {e}", exc_info=True)
 
     def create_retriever(self):
         """
@@ -40,10 +41,10 @@ class RagTool:
                     "lambda_mult": 0.75
                 }
             )
-            self.logger.info("Retriever created successfully.")
+            logging.info("Retriever created successfully.")
             return retriever
         except Exception as e:
-            self.logger.error(f"Error creating retriever: {e}", exc_info=True)
+            logging.error(f"Error creating retriever: {e}", exc_info=True)
 
     def rag_query_tool(self):
         """
@@ -64,14 +65,14 @@ class RagTool:
                 result = "\n\n".join(
                     f"Content: {doc.page_content}" for doc in response
                 )
-                self.logger.info(f"RAG query executed successfully for input: {query}")
+                logging.info(f"RAG query executed successfully for input: {query}")
                 return result
             except Exception as e:
-                self.logger.error(f"Error while retrieving context: {e}", exc_info=True)
+                logging.error(f"Error while retrieving context: {e}", exc_info=True)
                 return {"error": f"Failed to retrieve context: {str(e)}"}
 
         return run_rag_query
 
+
 tool_obj = RagTool()
 retrieve_context = tool_obj.rag_query_tool()
-
