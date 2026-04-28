@@ -4,8 +4,10 @@ from langchain_ollama.embeddings import OllamaEmbeddings
 from langchain_chroma import Chroma
 from src.core.config import config
 
-class Rag:
-    """ RAG-Pipeline """
+
+class IndexingPipeline:
+    """ RAG-Pipeline for Indexing documents"""
+
     def __init__(self):
         self.BASE_DIR = config.BASE_DIR
         self.EMBEDDING_MODEL = config.EMBEDDING_MODEL
@@ -13,16 +15,16 @@ class Rag:
                       f"{self.BASE_DIR}/data/Role_Documents_Handbook.docx"]
 
         self.splitter = RecursiveCharacterTextSplitter(
-                                  chunk_size=800,
-                                  chunk_overlap=200
-                                 )
+            chunk_size=800,
+            chunk_overlap=200
+        )
 
         self.all_chunks = []
 
         self.embedding = OllamaEmbeddings(
-                                base_url=config.BASE_URL,
-                                model=self.EMBEDDING_MODEL
-                                )
+            base_url=config.BASE_URL,
+            model=self.EMBEDDING_MODEL
+        )
 
     def doc_loader(self):
         """
@@ -63,10 +65,10 @@ class Rag:
         """
         try:
             store = Chroma.from_documents(
-                                      documents=self.all_chunks,
-                                      embedding=self.embedding,
-                                      persist_directory=f"{self.BASE_DIR}/chromaDB", # store Chromadb folder in root
-                                    )
+                documents=self.all_chunks,
+                embedding=self.embedding,
+                persist_directory=f"{self.BASE_DIR}/chromaDB",  # store Chromadb folder in root
+            )
             print("Stored embeddings successfully!")
             return store
         except Exception as e:
@@ -84,5 +86,6 @@ class Rag:
         except Exception as e:
             print(f"Error occurred while running pipeline : {e}")
 
-rag = Rag()
-rag.run_pipeline()
+
+rag_index = IndexingPipeline()
+rag_index.run_pipeline()
