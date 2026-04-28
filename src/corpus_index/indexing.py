@@ -3,6 +3,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_ollama.embeddings import OllamaEmbeddings
 from langchain_chroma import Chroma
 from src.core.config import config
+import logging
 
 
 class IndexingPipeline:
@@ -26,10 +27,8 @@ class IndexingPipeline:
                 base_url=config.BASE_URL,
                 model=self.EMBEDDING_MODEL
             )
-
-            self.logger = config.logger
         except Exception as e:
-            self.logger.error(f"Error while Initializing IndexingPipeline class : {e}", exc_info=True)
+            logging.error(f"Error while Initializing IndexingPipeline class : {e}", exc_info=True)
 
     def doc_loader(self):
         """
@@ -41,13 +40,13 @@ class IndexingPipeline:
             for file in self.files:
                 loader = UnstructuredLoader(file)
                 docs.extend(loader.load())
-            self.logger.info("Document's are Loaded Successfully!")
+            logging.info("Document's are Loaded Successfully!")
             return docs
 
         except FileNotFoundError as e:
-            self.logger.error(f" File not found: {e}", exc_info=True)
+            logging.error(f" File not found: {e}", exc_info=True)
         except Exception as e:
-            self.logger.error(f"Error occurred while loading {e}", exc_info=True)
+            logging.error(f"Error occurred while loading {e}", exc_info=True)
 
     def text_splitter(self, docs):
         """
@@ -58,10 +57,10 @@ class IndexingPipeline:
             splitter = self.splitter
             split_text = splitter.split_documents(docs)
             self.all_chunks.extend(split_text)
-            self.logger.info("Chunks formed successfully!")
+            logging.info("Chunks formed successfully!")
 
         except Exception as e:
-            self.logger.error(f"Error occurred while splitting {e}", exc_info=True)
+            logging.error(f"Error occurred while splitting {e}", exc_info=True)
 
     def create_vector_store(self):
         """
@@ -74,10 +73,10 @@ class IndexingPipeline:
                 embedding=self.embedding,
                 persist_directory=f"{self.BASE_DIR}/chromaDB",  # store Chromadb folder in root
             )
-            self.logger.info("Stored embeddings successfully!")
+            logging.info("Stored embeddings successfully!")
             return store
         except Exception as e:
-            self.logger.error(f"Error occurred while creating Vector-store: {e}", exc_info=True)
+            logging.error(f"Error occurred while creating Vector-store: {e}", exc_info=True)
 
     def run_pipeline(self):
         """
@@ -89,7 +88,7 @@ class IndexingPipeline:
             self.text_splitter(docs)
             return self.create_vector_store()
         except Exception as e:
-            self.logger.error(f"Error occurred while running pipeline : {e}", exc_info=True)
+            logging.error(f"Error occurred while running pipeline : {e}", exc_info=True)
 
 
 rag_index = IndexingPipeline()
