@@ -3,6 +3,7 @@ from langchain_core.tools import tool
 from src.database import SQL_DB
 from langchain_ollama import ChatOllama
 from src.core import config
+import logging
 
 
 class SQLTool:
@@ -19,13 +20,12 @@ class SQLTool:
             self.llm = ChatOllama(
                 model=config.OLLAMA_NLP2SQL,
                 temperature=0,
-                base_url = config.BASE_URL
+                base_url=config.BASE_URL
             )
             self.toolkit = None
             self.tools = None
-            self.logger = config.logger
         except Exception as e:
-            self.logger.error(f"Error while initializing SQL-tool class : {e}", exc_info=True)
+            logging.error(f"Error while initializing SQL-tool class : {e}", exc_info=True)
 
     def create_toolkit(self):
         """
@@ -34,9 +34,9 @@ class SQLTool:
         try:
             self.toolkit = SQLDatabaseToolkit(db=self.db, llm=self.llm)
             self.tools = self.toolkit.get_tools()
-            self.logger.info("Successfully created toolkit!")
+            logging.info("Successfully created toolkit!")
         except Exception as e:
-            self.logger.error(f"Error while creating toolkit: {e}", exc_info=True)
+            logging.error(f"Error while creating toolkit: {e}", exc_info=True)
 
     def sql_query_tool(self):
         """
@@ -57,10 +57,10 @@ class SQLTool:
                 self.create_toolkit()
                 sql_tools = self.tools[0]
                 result = sql_tools.invoke(query)
-                self.logger.info("Successfully executed SQL query!")
+                logging.info("Successfully executed SQL query!")
                 return result
             except Exception as e:
-                self.logger.error(f"Error while executing SQL query: {e}", exc_info=True)
+                logging.error(f"Error while executing SQL query: {e}", exc_info=True)
 
         return run_sql_query
 
