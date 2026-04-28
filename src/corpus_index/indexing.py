@@ -9,22 +9,27 @@ class IndexingPipeline:
     """ RAG-Pipeline for Indexing documents"""
 
     def __init__(self):
-        self.BASE_DIR = config.BASE_DIR
-        self.EMBEDDING_MODEL = config.EMBEDDING_MODEL
-        self.files = [f"{self.BASE_DIR}/data/HR_Policies_Handbook.docx",
-                      f"{self.BASE_DIR}/data/Role_Documents_Handbook.docx"]
+        try:
+            self.BASE_DIR = config.BASE_DIR
+            self.EMBEDDING_MODEL = config.EMBEDDING_MODEL
+            self.files = [f"{self.BASE_DIR}/data/HR_Policies_Handbook.docx",
+                          f"{self.BASE_DIR}/data/Role_Documents_Handbook.docx"]
 
-        self.splitter = RecursiveCharacterTextSplitter(
-            chunk_size=800,
-            chunk_overlap=200
-        )
+            self.splitter = RecursiveCharacterTextSplitter(
+                chunk_size=800,
+                chunk_overlap=200
+            )
 
-        self.all_chunks = []
+            self.all_chunks = []
 
-        self.embedding = OllamaEmbeddings(
-            base_url=config.BASE_URL,
-            model=self.EMBEDDING_MODEL
-        )
+            self.embedding = OllamaEmbeddings(
+                base_url=config.BASE_URL,
+                model=self.EMBEDDING_MODEL
+            )
+
+            self.logger = config.logger
+        except Exception as e:
+            self.logger.error(f"Error while Initializing IndexingPipeline class : {e}", exc_info=True)
 
     def doc_loader(self):
         """
@@ -36,13 +41,13 @@ class IndexingPipeline:
             for file in self.files:
                 loader = UnstructuredLoader(file)
                 docs.extend(loader.load())
-            print("Document's are Loaded Successfully!")
+            self.logger.info("Document's are Loaded Successfully!")
             return docs
 
         except FileNotFoundError as e:
-            print(f"File not found: {e}")
+            self.logger.error(f" File not found: {e}", exc_info=True)
         except Exception as e:
-            print(f"Error occurred while loading {e}")
+            self.logger.error(f"Error occurred while loading {e}", exc_info=True)
 
     def text_splitter(self, docs):
         """
@@ -53,10 +58,10 @@ class IndexingPipeline:
             splitter = self.splitter
             split_text = splitter.split_documents(docs)
             self.all_chunks.extend(split_text)
-            print("Chunks formed successfully!")
+            self.logger.info("Chunks formed successfully!")
 
         except Exception as e:
-            print(f"Error occurred while splitting {e}")
+            self.logger.error(f"Error occurred while splitting {e}", exc_info=True)
 
     def create_vector_store(self):
         """
@@ -69,10 +74,10 @@ class IndexingPipeline:
                 embedding=self.embedding,
                 persist_directory=f"{self.BASE_DIR}/chromaDB",  # store Chromadb folder in root
             )
-            print("Stored embeddings successfully!")
+            self.logger.info("Stored embeddings successfully!")
             return store
         except Exception as e:
-            print(f"Error occurred while creating Vector-store: {e}")
+            self.logger.error(f"Error occurred while creating Vector-store: {e}", exc_info=True)
 
     def run_pipeline(self):
         """
@@ -84,7 +89,7 @@ class IndexingPipeline:
             self.text_splitter(docs)
             return self.create_vector_store()
         except Exception as e:
-            print(f"Error occurred while running pipeline : {e}")
+            self.logger.error(f"Error occurred while running pipeline : {e}", exc_info=True)
 
 
 rag_index = IndexingPipeline()
