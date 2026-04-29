@@ -18,9 +18,9 @@ class SQLTool:
             self.db = SQL_DB.connect()  # Initialize database connection
 
             self.llm = ChatOllama(
-                model=config.OLLAMA_NLP2SQL,
+                model=config.GEMMA_CLOUD_MODEL,
                 temperature=0,
-                base_url=config.BASE_URL
+                # base_url=config.BASE_URL
             )
             self.toolkit = None
             self.tools = None
@@ -66,4 +66,4 @@ class SQLTool:
 
 
 sql_tool_obj = SQLTool()
-sql_toolkit = sql_tool_obj.sql_query_tool()
+sql_tool = sql_tool_obj.sql_query_tool()
