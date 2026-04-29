@@ -1,7 +1,7 @@
 from langchain_ollama import ChatOllama
 from src.core import config
 from src.core import prompt_loader
-from src.tools import retrieve_context, sql_toolkit
+from src.tools import rag_tool, sql_tool
 from langchain.agents import create_agent
 import logging
 
@@ -29,7 +29,7 @@ class OrchestratorAgent:
         try:
             self.agent = create_agent(
                 model=self.llm,
-                tools=[retrieve_context, sql_toolkit],
+                tools=[rag_tool, sql_tool],
                 system_prompt=self.prompt
             )
             logging.info("Agent created successfully!")
@@ -42,16 +42,16 @@ class OrchestratorAgent:
         """
         try:
             self.create_agent()
-            for event in self.agent.stream(
-                    {"messages": [{"role": "user", "content": query}]}
+            for chunk in self.agent.stream(
+                    {"messages": [{"role": "user", "content": query}]},
+                    stream_mode="messages"
             ):
-                result = event["messages"][-1].pretty_print()
-                return result
-
-            logging.info("Agent ran successfully!")
-
+                res = chunk[0]
+                yield f"data: {res.content}\n\n"
+            logging.info("Agent streamed successfully!")
         except Exception as e:
             logging.error(f"Error while running query: {e}", exc_info=True)
 
 
-agent = OrchestratorAgent()
+orchest_agent = OrchestratorAgent()
+orchest_agent.run_query("who is the manager of AI department?")
