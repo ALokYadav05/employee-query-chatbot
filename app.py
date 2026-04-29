@@ -1,38 +1,33 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
-from src import agent
+from fastapi.responses import StreamingResponse
+from pydantic import BaseModel, Field
+from src import orchest_agent
 
 app = FastAPI()
 
 
-class UserRequest(BaseModel):
+class UserIn(BaseModel):
     """ Validate user request"""
-    query: str
-
-
-class AIResponse(BaseModel):
-    """ Validate AI response """
-    response: str
-    status: str
+    query: str = Field(..., description="User query")
 
 
 @app.post("/user")
-def handle_request(req: UserRequest):
+def handle_request(req: UserIn):
     """
     Handle user request
-    Returns: AI response
+    Returns: LLM streaming response
     """
     try:
-        response = agent.run_query(req.query)
-        if str(response) is None:
-            print("data not found")
-        return AIResponse(
-            response=str(response),
-            status="200"
-        )
+        def event_stream():
+            """ Streams user request """
+            for chunk in orchest_agent.run_query(req.query):
+                yield chunk
+
+        return StreamingResponse(event_stream(), media_type="text/event-stream")
 
     except Exception as e:
-        return AIResponse(
-            response=str(e),
-            status="442"
-        )
+        def error_stream():
+            """" Streams Error """
+            yield f"Error: {str(e)}"
+
+        return StreamingResponse(error_stream(), media_type="text/event-stream")
