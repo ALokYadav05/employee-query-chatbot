@@ -75,4 +75,4 @@ class RagTool:
 
 
 tool_obj = RagTool()
-retrieve_context = tool_obj.rag_query_tool()
+rag_tool = tool_obj.rag_query_tool()
