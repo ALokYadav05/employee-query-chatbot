@@ -2,9 +2,12 @@ from src.core import config
 from sqlalchemy import create_engine
 from langchain_community.utilities import SQLDatabase
 from sqlalchemy.exc import OperationalError
+import logging
+
 
 class SQLDatabaseConn:
     """ Handles MSSQL database connectivity using SQLAlchemy + pyodbc. """
+
     def __init__(self):
         self.connection_url = config.SQL_CONN_URL
         self.engine = None
@@ -21,13 +24,13 @@ class SQLDatabaseConn:
 
             # Create a LangChain SQLDatabase wrapper around the SQLAlchemy engine
             self.db = SQLDatabase(self.engine)
-            print("SQL Database connection established successfully!")
+            logging.info("SQL Database connection established successfully!")
             return self.db
 
         except OperationalError as e:
-            print(f"SQL Connection Error: {e}")
+            logging.error(f"SQL Connection Error: {e}", exc_info=True)
         except Exception as e:
-            print(f"SQL Error: {e}")
+            logging.error(f"SQL Connection Error: {e}", exc_info=True)
 
     def dispose(self):
         """
@@ -38,7 +41,8 @@ class SQLDatabaseConn:
                 # Dispose engine to release database connections
                 self.engine.dispose()
         except Exception as e:
-            print(f"Dispose Error: {e}")
+            logging.error(f"Dispose Error: {e}", exc_info=True)
+
 
 # Create a global SQLDatabaseConn instance
 SQL_DB = SQLDatabaseConn()

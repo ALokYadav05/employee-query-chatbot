@@ -1,23 +1,27 @@
+from langchain_core.messages import AIMessageChunk, HumanMessage
 from langchain_ollama import ChatOllama
 from src.core import config
 from src.core import prompt_loader
-from src.tools import retrieve_context, sql_toolkit
+from src.tools import rag_tool, sql_tool
 from langchain.agents import create_agent
+import logging
+
 
 class OrchestratorAgent:
     """
     Orchestrator Agent that uses Language model with SQL and RAG tools
     to answer employee related queries
     """
+
     def __init__(self):
         """ Initialize the agent with model and system prompt."""
         self.llm = ChatOllama(
-                            model = config.MISTRAL_NEMO,
-                            temperature=0.3,
-                            base_url=config.BASE_URL
-                            )
+            model=config.MISTRAL_NEMO,
+            temperature=0.3,
+            base_url=config.BASE_URL
+        )
         self.prompt = prompt_loader.load_prompt()
-        self.agent = None
+        self.agent = self.create_agent()
 
     def create_agent(self):
         """
@@ -25,28 +29,34 @@ class OrchestratorAgent:
         """
         try:
             self.agent = create_agent(
-                            model = self.llm,
-                            tools = [retrieve_context, sql_toolkit],
-                            system_prompt= self.prompt
-                        )
-        except Exception as e:
-            print(f"Error while creating agent: {e}")
+                model=self.llm,
+                tools=[rag_tool, sql_tool],
+                system_prompt=self.prompt
+            )
+            logging.info("Agent created successfully!")
+            return self.agent
 
-    def run_query(self, query : str):
-        """
-        Run a user query and stream the agent's response.
+        except Exception as e:
+            logging.error(f"Error while creating agent: {e}", exc_info=True)
+
+    async def run_query(self, query: str):
+        """"
+        Sends LLM response in streaming format
+        Returns: Yield chunk
         """
         try:
-            for event in self.agent.stream(
-                    {"messages": [{"role": "user", "content": query}]},
-                    stream_mode="values",
+            input_query = [HumanMessage(content=query)]
+
+            async for chunk, metadata in self.agent.astream(
+                    input_query,
+                    stream_mode="messages"
             ):
-                event["messages"][-1].pretty_print()
+                logging.info("Everything is working!")
 
+                if isinstance(chunk, AIMessageChunk) and chunk.content:
+                    yield chunk.content
         except Exception as e:
-            print(f"Error while querying agent: {e}")
+            logging.error(f"Error in run_query: {e}", exc_info=True)
 
-if __name__ == "__main__":
-    agent = OrchestratorAgent()
-    agent.create_agent()
-    agent.run_query("Give me the names of employee with highest salary in each department")
+
+orchest_agent = OrchestratorAgent().create_agent()

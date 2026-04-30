@@ -16,7 +16,11 @@ dependencies = [
     "unstructured[docx] (>=0.22.22,<0.23.0)",
     "langchain-chroma (>=1.1.0,<2.0.0)",
     "pyodbc (>=5.3.0,<6.0.0)",
-    "langchain-mistralai (>=1.1.2,<2.0.0)"
+    "langchain-mistralai (>=1.1.2,<2.0.0)",
+    "fastapi (>=0.136.1,<0.137.0)",
+    "pydantic (>=2.13.3,<3.0.0)",
+    "uvicorn (>=0.46.0,<0.47.0)",
+    "streamlit (>=1.57.0,<2.0.0)"
 ]
 
 
