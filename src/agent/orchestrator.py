@@ -1,3 +1,4 @@
+from langchain_core.messages import AIMessageChunk, HumanMessage
 from langchain_ollama import ChatOllama
 from src.core import config
 from src.core import prompt_loader
@@ -15,12 +16,12 @@ class OrchestratorAgent:
     def __init__(self):
         """ Initialize the agent with model and system prompt."""
         self.llm = ChatOllama(
-            model=config.GEMMA_CLOUD_MODEL,
+            model=config.MISTRAL_NEMO,
             temperature=0.3,
-            # base_url=config.BASE_URL
+            base_url=config.BASE_URL
         )
         self.prompt = prompt_loader.load_prompt()
-        self.agent = None
+        self.agent = self.create_agent()
 
     def create_agent(self):
         """
@@ -33,25 +34,29 @@ class OrchestratorAgent:
                 system_prompt=self.prompt
             )
             logging.info("Agent created successfully!")
+            return self.agent
+
         except Exception as e:
             logging.error(f"Error while creating agent: {e}", exc_info=True)
 
-    def run_query(self, query: str):
-        """
-        Run a user query and stream the agent's response.
+    async def run_query(self, query: str):
+        """"
+        Sends LLM response in streaming format
+        Returns: Yield chunk
         """
         try:
-            self.create_agent()
-            for chunk in self.agent.stream(
-                    {"messages": [{"role": "user", "content": query}]},
+            input_query = [HumanMessage(content=query)]
+
+            async for chunk, metadata in self.agent.astream(
+                    input_query,
                     stream_mode="messages"
             ):
-                res = chunk[0]
-                yield f"data: {res.content}\n\n"
-            logging.info("Agent streamed successfully!")
+                logging.info("Everything is working!")
+
+                if isinstance(chunk, AIMessageChunk) and chunk.content:
+                    yield chunk.content
         except Exception as e:
-            logging.error(f"Error while running query: {e}", exc_info=True)
+            logging.error(f"Error in run_query: {e}", exc_info=True)
 
 
-orchest_agent = OrchestratorAgent()
-orchest_agent.run_query("who is the manager of AI department?")
+orchest_agent = OrchestratorAgent().create_agent()
