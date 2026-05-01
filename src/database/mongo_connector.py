@@ -7,10 +7,14 @@ import logging
 
 class MongoDBConn:
     """
-    MongoDB Connector
+    Handles the connection logic for MongoDB
+    Reads connection details from config
     """
 
     def __init__(self):
+        """
+        Initializes the MongoClient and selects the database and collection.
+        """
         self.url = config.MONGO_CONN_URL
 
         if not self.url:
@@ -18,7 +22,7 @@ class MongoDBConn:
 
         try:
             self.client = MongoClient(self.url)
-            self.client.admin.command('ping')  # Force connection check
+            self.client.admin.command('ping')  # Force connection check, verifies the connection with a ping
             self.db = self.client[config.MONGO_DB]
             self.collection = self.db[config.MONGO_COLLECTION]
             logging.info(f"Connected to MongoDB Database successfully!! : {self.db}")
@@ -29,7 +33,11 @@ class MongoDBConn:
             logging.error(f"Unexpected error in MongoDB setup : {error}", exc_info=True)
 
     def get_saver(self):
-        """ Creates MongoDBSaver Instance """
+        """
+        Creates and returns MongoDBSaver Instance
+        Returns:
+            MongoDBSaver: An instance of MongoDBSaver for checkpointing.
+        """
         try:
             return MongoDBSaver(
                 client=self.client,
