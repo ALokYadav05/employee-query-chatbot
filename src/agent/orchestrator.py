@@ -4,6 +4,7 @@ from src.core import config
 from src.core import prompt_loader
 from src.tools import rag_tool, sql_tool
 from langchain.agents import create_agent
+from src.database import mongo_checkpointer
 import logging
 
 
@@ -16,11 +17,12 @@ class OrchestratorAgent:
     def __init__(self):
         """ Initialize the agent with model and system prompt."""
         self.llm = ChatOllama(
-            model=config.MISTRAL_NEMO,
+            model=config.GEMMA_CLOUD_MODEL,
             temperature=0.3,
-            base_url=config.BASE_URL
+            # base_url=config.BASE_URL
         )
         self.prompt = prompt_loader.load_prompt()
+        self.checkpointer = mongo_checkpointer
         self.agent = self.create_agent()
 
     def create_agent(self):
@@ -31,7 +33,9 @@ class OrchestratorAgent:
             self.agent = create_agent(
                 model=self.llm,
                 tools=[rag_tool, sql_tool],
-                system_prompt=self.prompt
+                system_prompt=self.prompt,
+                checkpointer=self.checkpointer
+
             )
             logging.info("Agent created successfully!")
             return self.agent
@@ -45,11 +49,21 @@ class OrchestratorAgent:
         Returns: Yield chunk
         """
         try:
-            input_query = [HumanMessage(content=query)]
+            config_id = {
+                "configurable":
+                    {
+                        "thread_id": "1"
+                     }
+            }
+            input_query = {
+                "messages":
+                    [HumanMessage(content=query)]
+            }
 
             async for chunk, metadata in self.agent.astream(
                     input_query,
-                    stream_mode="messages"
+                    stream_mode="messages",
+                    config=config_id
             ):
                 logging.info("Everything is working!")
 
@@ -59,4 +73,4 @@ class OrchestratorAgent:
             logging.error(f"Error in run_query: {e}", exc_info=True)
 
 
-orchest_agent = OrchestratorAgent().create_agent()
+orchest_agent = OrchestratorAgent()
