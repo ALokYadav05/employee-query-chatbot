@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from src import orchest_agent
+import logging
 
 app = FastAPI()
 
@@ -13,7 +14,8 @@ class UserIn(BaseModel):
     Attributes:
          query (str): The natural language query from the employee.
     """
-    query: str = Field(..., description="User query")
+    query: str = Field(..., min_length=0, description="User query that goes to LLM",
+                       title="User-Query", examples=["What is company leave policy?"])
 
 
 @app.post("/user")
@@ -36,14 +38,11 @@ async def handle_request(req: UserIn):
             async for token in orchest_agent.run_query(req.query):
                 if token:
                     # yield as a JSON string followed by a newline
-                    yield f"{json.dumps({
-                        'response': token
-                    })}\n"
+                    yield f"{json.dumps({'response': token})}\n"
 
         except Exception as e:
-            yield f"{json.dumps({
-                'error': str(e)
-            })}\n"
+            logging.error(f"Stream Error: {e}", exc_info=True)
+            yield f"{json.dumps({'error': str(e)})}\n"
 
     return StreamingResponse(
         event_stream(),
