@@ -16,6 +16,9 @@ class Config:
         self.SQL_CONN_URL = os.getenv("SQL_CONN_URL")
         self.OLLAMA_NLP2SQL = os.getenv("OLLAMA_NLP2SQL")
         self.GEMMA_CLOUD_MODEL = os.getenv("GEMMA_CLOUD_MODEL")
+        self.MONGO_CONN_URL = os.getenv("MONGO_CONN_URL")
+        self.MONGO_DB = os.getenv("MONGODB_DATABASE")
+        self.MONGO_COLLECTION = os.getenv("MONGODB_COLLECTION")
 
 
 config = Config()
