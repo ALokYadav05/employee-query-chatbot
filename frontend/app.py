@@ -21,7 +21,7 @@ def main():
                 unsafe_allow_html=True
                 )
 
-    st.title("👽 AI Employee Assistant")
+    st.title("AI Employee Assistant",text_alignment="center")
 
     # Initialize Chat History
     if "messages" not in st.session_state:
@@ -29,7 +29,7 @@ def main():
 
     # ideal state (Welcome Screen)
     if not st.session_state.messages:
-        st.markdown("### 👋 Welcome!")
+        st.markdown("### Welcome, Alok  !")
         st.info("I'm your AI assistant. You can ask me about company policies, Employee related details etc.")
 
     # display history
