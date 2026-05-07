@@ -20,9 +20,9 @@ class OrchestratorAgent:
     def __init__(self):
         """ Initialize the agent with model and system prompt."""
         self.llm = ChatOllama(
-            model=config.MISTRAL_NEMO,
+            model=config.GEMMA_CLOUD_MODEL,
             temperature=0.3,
-            base_url=config.BASE_URL
+            # base_url=config.BASE_URL
         )
         self.prompt = prompt_loader.load_prompt()
         self.checkpointer = mongo_checkpointer
