@@ -54,8 +54,8 @@ class SQLTool:
             Converts the query to SQL and returns the results
             """
             try:
-                self.create_toolkit()
-                sql_tools = self.tools[0]
+                # use a generator expression to iterate and safely locate the SQL tool by its identifier
+                sql_tools = next(t for t in self.tools if t.name == "sql_db_query")
                 result = sql_tools.invoke(query)
                 logging.info("Successfully executed SQL query!")
                 return result
