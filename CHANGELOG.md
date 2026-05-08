@@ -13,7 +13,7 @@ All the notable changes to this project will be documented in this file.
 - **Tools**: 
     - RAG Tool for document retrieval using ChromaDB and LangChain.
     - SQL Tool for natural language to SQL conversion.
-- **Storage**: Multi-database support with SQLite, MongoDB, and ChromaDB vector store.
+- **Storage**: Multi-database support with MSSQL, MongoDB, and ChromaDB vector store.
 - **API**: FastAPI backend with Pydantic validation and RESTful endpoints.
 - **Project Foundation**: Modular structure, Poetry dependency management, and comprehensive documentation.
 
