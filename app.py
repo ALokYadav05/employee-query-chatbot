@@ -1,6 +1,6 @@
 import json
-from fastapi import FastAPI
-from fastapi.responses import StreamingResponse
+from fastapi import FastAPI, status
+from fastapi.responses import StreamingResponse, JSONResponse
 from pydantic import BaseModel, Field
 from src import orchest_agent
 import logging
@@ -27,6 +27,11 @@ async def handle_request(req: UserIn):
     Returns:
         StreamingResponse: A chunked stream of JSON objects (NDJSON format).
     """
+    if not req.query.strip():
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"error": "Query cannot be empty"}
+        )
 
     async def event_stream():  # Make this async
         """
@@ -42,9 +47,10 @@ async def handle_request(req: UserIn):
 
         except Exception as e:
             logging.error(f"Stream Error: {e}", exc_info=True)
-            yield f"{json.dumps({'error': str(e)})}\n"
+            yield f"{json.dumps({'error': 'Internal stream error', 'status': 500})}\n"
 
     return StreamingResponse(
         event_stream(),
-        media_type="application/x-ndjson"
+        media_type="application/x-ndjson",
+        status_code=status.HTTP_200_OK
     )

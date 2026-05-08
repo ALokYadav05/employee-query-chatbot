@@ -21,7 +21,12 @@ class MongoDBConn:
             raise ValueError("MONGO_CONN_URL is Missing!")
 
         try:
-            self.client = MongoClient(self.url)
+            self.client = MongoClient(
+                self.url,
+                maxPoolSize=20,
+                minPoolSize=2,
+                maxIdleTimeMS=600000   # 10 minutes
+            )
             self.client.admin.command('ping')  # Force connection check, verifies the connection with a ping
             self.db = self.client[config.MONGO_DB]
             self.collection = self.db[config.MONGO_COLLECTION]
