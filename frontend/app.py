@@ -16,7 +16,7 @@ def main():
         <style>
             /* Move content higher up the page */
             .main .block-container {
-                padding-top: 1rem;
+                padding-top: 1rem;  
             }
 
             /* Make chat bubbles look rounded */
@@ -28,7 +28,7 @@ def main():
         unsafe_allow_html=True,
     )
 
-    st.title("AI Employee Assistant",text_alignment="center")
+    st.title("AI Employee Assistant", text_alignment="center")
 
     # Initialize Chat History
     if "messages" not in st.session_state:
@@ -63,6 +63,10 @@ def main():
                 try:
                     with requests.post("http://localhost:8000/user",
                                        json={"query": user_query}, stream=True) as response:
+
+                        if response.status_code != 200:
+                            st.error(f"Backend Error: {response.status_code} - {response.reason}")
+
                         for line in response.iter_lines():
                             if line:
                                 decoded = line.decode('utf-8').replace("data: ", "").strip()
