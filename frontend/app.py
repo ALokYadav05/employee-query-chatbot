@@ -11,15 +11,22 @@ def main():
     st.set_page_config(page_title="AI Employee Assistant", page_icon="🤖", layout="centered")
 
     # UI Styling
-    st.markdown("""
-                    <style>
-                    [data-tested="stSidebar"] { display: none; }
-                    .block-container { padding-top: 2rem; }
-                    [data-tested="stChatMessage"] { border-radius: 15px; margin-bottom: 10px; }
-                    </style>
-                      """,
-                unsafe_allow_html=True
-                )
+    st.markdown(
+        """
+        <style>
+            /* Move content higher up the page */
+            .main .block-container {
+                padding-top: 1rem;
+            }
+
+            /* Make chat bubbles look rounded */
+            .stChatMessage {
+                border-radius: 20px;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
     st.title("AI Employee Assistant",text_alignment="center")
 
