@@ -20,7 +20,13 @@ class SQLDatabaseConn:
         """
         try:
             # Create SQLAlchemy engine using connection string
-            self.engine = create_engine(self.connection_url)
+            self.engine = create_engine(
+                self.connection_url,
+                pool_size=5,
+                max_overflow=5,     # extra burst connection if pool_size limit is reached
+                pool_recycle=3600,  # connection expires after 1 hour
+                pool_pre_ping=True  # check if connection alive
+            )
 
             # Create a LangChain SQLDatabase wrapper around the SQLAlchemy engine
             self.db = SQLDatabase(self.engine)
