@@ -12,7 +12,7 @@ def run_servers():
     """
     # Start the Backend (FastAPI via Uvicorn)
     print("Starting Backend Server on Port 8000...")
-    backend_process = subprocess.Popen([
+    backend_process = subprocess.Popen([                           # non-blocking behavior to start backend
         sys.executable, "-m", "uvicorn", "app:app",
         "--host", "0.0.0.0", "--port", "8000"
     ])
@@ -23,7 +23,7 @@ def run_servers():
     # start the Frontend (Streamlit)
     print("Starting Streamlit UI...")
     try:
-        subprocess.run([
+        subprocess.run([                                             # blocking behavior to run streamlit
             sys.executable, "-m", "streamlit", "run", "frontend/app.py"
         ])
     except KeyboardInterrupt:
