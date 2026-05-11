@@ -59,7 +59,7 @@ def main():
             placeholder = st.empty()
             full_response = ""
 
-            with st.spinner("🤔 Thinking..."):
+            with st.spinner("🤔 Thinking..."):    #type: ignore
                 try:
                     with requests.post("http://localhost:8000/user",
                                        json={"query": user_query}, stream=True) as response:

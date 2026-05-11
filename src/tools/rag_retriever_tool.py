@@ -13,7 +13,7 @@ class RagTool:
 
             # Initialize embedding model
             self.embedding = OllamaEmbeddings(
-                base_url=config.BASE_URL,
+                # base_url=config.BASE_URL,
                 model=self.embeddings_model
             )
 
