@@ -67,11 +67,9 @@ def main():
                         if response.status_code != 200:
                             st.error(f"Backend Error: {response.status_code} - {response.reason}")
 
-                        for line in response.iter_lines():
-                            if line:
-                                decoded = line.decode('utf-8').replace("data: ", "").strip()
+                        for line in response.iter_lines(decode_unicode=True):
                                 try:
-                                    data = json.loads(decoded)
+                                    data = json.loads(line)
                                     if "response" in data:
                                         full_response += data["response"]
                                         placeholder.markdown(full_response + "|")
