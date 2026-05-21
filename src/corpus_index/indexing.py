@@ -2,9 +2,10 @@ from langchain_unstructured import UnstructuredLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_ollama.embeddings import OllamaEmbeddings
 from langchain_chroma import Chroma
-from src.core.config import config
+from src.core.config import Config
 import logging
 
+config = Config()
 
 class IndexingPipeline:
     """ RAG-Pipeline for Indexing documents"""
@@ -91,5 +92,5 @@ class IndexingPipeline:
             logging.error(f"Error occurred while running pipeline : {e}", exc_info=True)
 
 
-rag_index = IndexingPipeline()
+rag_index = IndexingPipeline()   # Initializing here, because it is standalone file
 rag_index.run_pipeline()
