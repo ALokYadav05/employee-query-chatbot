@@ -1,4 +1,4 @@
-from .sql_connector import SQL_DB
-from .mongo_connector import mongo_checkpointer
+from .sql_connector import SQLDatabaseConn
+from .mongo_connector import MongoDBConn
 
-__all__ = ['SQL_DB', 'mongo_checkpointer']
+__all__ = ['SQLDatabaseConn', 'MongoDBConn']
