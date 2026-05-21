@@ -1,6 +1,6 @@
-from .agent import orchest_agent
-from .core import config, prompt_loader
-from .database import SQL_DB
-from .tools import rag_tool, sql_tool
+from .agent import OrchestratorAgent
+from .core import Config, PromptLoader
+from .database import SQLDatabaseConn
+from .tools import RagTool, SQLTool
 
-__all__ = ['orchest_agent', 'config', 'prompt_loader', 'SQL_DB', 'rag_tool', 'sql_tool']
+__all__ = ['OrchestratorAgent', 'Config', 'PromptLoader', 'SQLDatabaseConn', 'RagTool', 'SQLTool']
