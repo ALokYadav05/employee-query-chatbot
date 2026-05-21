@@ -1,4 +1,4 @@
-from .config import config
-from .prompt_loader import prompt_loader
+from .config import Config
+from .prompt_loader import PromptLoader
 
-__all__ = ["config","prompt_loader"]
+__all__ = ["Config","PromptLoader"]
