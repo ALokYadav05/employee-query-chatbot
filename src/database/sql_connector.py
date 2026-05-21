@@ -1,8 +1,10 @@
-from src.core import config
+from src.core import Config
 from sqlalchemy import create_engine
 from langchain_community.utilities import SQLDatabase
 from sqlalchemy.exc import OperationalError
 import logging
+
+config = Config()
 
 
 class SQLDatabaseConn:
@@ -23,7 +25,7 @@ class SQLDatabaseConn:
             self.engine = create_engine(
                 self.connection_url,
                 pool_size=5,
-                max_overflow=5,     # extra burst connection if pool_size limit is reached
+                max_overflow=5,  # extra burst connection if pool_size limit is reached
                 pool_recycle=3600,  # connection expires after 1 hour
                 pool_pre_ping=True  # check if connection alive
             )
@@ -48,7 +50,3 @@ class SQLDatabaseConn:
                 self.engine.dispose()
         except Exception as e:
             logging.error(f"Dispose Error: {e}", exc_info=True)
-
-
-# Create a global SQLDatabaseConn instance
-SQL_DB = SQLDatabaseConn()

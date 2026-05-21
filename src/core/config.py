@@ -20,6 +20,3 @@ class Config:
         self.MONGO_DB = os.getenv("MONGODB_DATABASE")
         self.MONGO_COLLECTION = os.getenv("MONGODB_COLLECTION")
         self.FALLBACK_MODEL = os.getenv("OLLAMA_LLAMA")
-
-
-config = Config()

@@ -1,9 +1,12 @@
 from langchain_community.agent_toolkits import SQLDatabaseToolkit
 from langchain_core.tools import tool
-from src.database import SQL_DB
+from src.database import SQLDatabaseConn
 from langchain_ollama import ChatOllama
-from src.core import config
+from src.core import Config
 import logging
+
+config = Config()
+sql_db = SQLDatabaseConn()
 
 
 class SQLTool:
@@ -15,7 +18,7 @@ class SQLTool:
     def __init__(self):
         """ Initialize database connection and LLM """
         try:
-            self.db = SQL_DB.connect()  # Initialize database connection
+            self.db = sql_db.connect()  # Initialize database connection
 
             self.llm = ChatOllama(
                 model=config.GEMMA_CLOUD_MODEL,
@@ -63,7 +66,3 @@ class SQLTool:
                 logging.error(f"Error while executing SQL query: {e}", exc_info=True)
 
         return run_sql_query
-
-
-sql_tool_obj = SQLTool()
-sql_tool = sql_tool_obj.sql_query_tool()

@@ -1,4 +1,4 @@
-from .rag_retriever_tool import rag_tool
-from .sql_tool import sql_tool
+from .rag_retriever_tool import RagTool
+from .sql_tool import SQLTool
 
-__all__ = ["rag_tool", "sql_tool"]
+__all__ = ["RagTool", "SQLTool"]

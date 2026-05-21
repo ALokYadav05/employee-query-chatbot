@@ -1,6 +1,8 @@
 import os
-from src.core import config
+from src.core import Config
 import logging
+
+config = Config()
 
 
 class PromptLoader:
@@ -27,6 +29,3 @@ class PromptLoader:
                 return prompt
         except Exception as e:
             logging.error(f"Error while loading system prompt : {e}", exc_info=True)
-
-
-prompt_loader = PromptLoader()

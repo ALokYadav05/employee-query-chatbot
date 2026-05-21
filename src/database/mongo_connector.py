@@ -1,8 +1,10 @@
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure, ConfigurationError
 from langgraph.checkpoint.mongodb import MongoDBSaver
-from src.core import config
+from src.core import Config
 import logging
+
+config = Config()
 
 
 class MongoDBConn:
@@ -25,7 +27,7 @@ class MongoDBConn:
                 self.url,
                 maxPoolSize=20,
                 minPoolSize=2,
-                maxIdleTimeMS=600000   # 10 minutes
+                maxIdleTimeMS=600000  # 10 minutes
             )
             self.client.admin.command('ping')  # Force connection check, verifies the connection with a ping
             self.db = self.client[config.MONGO_DB]
@@ -51,6 +53,3 @@ class MongoDBConn:
             )
         except Exception as e:
             logging.error(f"Error while MongoDBSaver: {e}", exc_info=True)
-
-
-mongo_checkpointer = MongoDBConn().get_saver()

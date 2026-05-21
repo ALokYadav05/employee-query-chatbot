@@ -1,8 +1,10 @@
 from langchain_chroma import Chroma
 from langchain_ollama import OllamaEmbeddings
-from src.core import config
+from src.core import Config
 from langchain.tools import tool
 import logging
+
+config = Config()
 
 
 class RagTool:
@@ -72,7 +74,3 @@ class RagTool:
                 return {"error": f"Failed to retrieve context: {str(e)}"}
 
         return run_rag_query
-
-
-tool_obj = RagTool()
-rag_tool = tool_obj.rag_query_tool()

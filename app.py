@@ -2,10 +2,11 @@ import json
 from fastapi import FastAPI, status
 from fastapi.responses import StreamingResponse, JSONResponse
 from pydantic import BaseModel, Field
-from src import orchest_agent
+from src import OrchestratorAgent
 import logging
 
 app = FastAPI()
+orchest_agent = OrchestratorAgent()
 
 
 class UserIn(BaseModel):
