@@ -59,7 +59,7 @@ def main():
             placeholder = st.empty()
             full_response = ""
 
-            with st.spinner("🤔 Thinking..."):    #type: ignore
+            with st.spinner("🤔 Thinking..."):  # type: ignore
                 try:
                     with requests.post("http://localhost:8000/user",
                                        json={"query": user_query}, stream=True) as response:
@@ -68,14 +68,14 @@ def main():
                             st.error(f"Backend Error: {response.status_code} - {response.reason}")
 
                         for line in response.iter_lines(decode_unicode=True):
-                                try:
-                                    data = json.loads(line)
-                                    if "response" in data:
-                                        full_response += data["response"]
-                                        placeholder.markdown(full_response + "|")
-                                except Exception as e:
-                                    st.error(e)
-                                    continue
+                            try:
+                                data = json.loads(line)
+                                if "response" in data:
+                                    full_response += data["response"]
+                                    placeholder.markdown(full_response + "|")
+                            except Exception as e:
+                                st.error(e)
+                                continue
                 except Exception as e:
                     st.error(f"Connection failed: {e}")
 
