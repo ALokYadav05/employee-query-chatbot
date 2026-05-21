@@ -1,14 +1,21 @@
 from langchain_core.messages import AIMessageChunk, HumanMessage
 from langchain_ollama.chat_models import ChatOllama
-from src.core import config
-from src.core import prompt_loader
-from src.tools import rag_tool, sql_tool
+from src.core import Config
+from src.core import PromptLoader
+from src.tools import RagTool, SQLTool
 from langchain.agents import create_agent
 from langchain.agents.middleware import SummarizationMiddleware, ModelFallbackMiddleware
 from langchain_core.runnables import RunnableConfig
-from src.database import mongo_checkpointer
+from src.database import MongoDBConn
 from typing import Literal, cast, Any
 import logging
+
+# Initialize required class
+config = Config()
+prompt_loader = PromptLoader()
+mongo_db = MongoDBConn()
+rag_tool = RagTool()
+sql_tool = SQLTool()
 
 
 class OrchestratorAgent:
@@ -25,7 +32,7 @@ class OrchestratorAgent:
             # base_url=config.BASE_URL
         )
         self.prompt = prompt_loader.load_prompt()
-        self.checkpointer = mongo_checkpointer
+        self.checkpointer = mongo_db.get_saver()
         self.agent = self.agent_creation()
 
     def agent_creation(self):
@@ -35,7 +42,7 @@ class OrchestratorAgent:
         try:
             agent = create_agent(
                 model=self.llm,
-                tools=[rag_tool, sql_tool],
+                tools=[rag_tool.rag_query_tool(), sql_tool.sql_query_tool()],
                 system_prompt=self.prompt,
                 checkpointer=self.checkpointer,
                 middleware=[
@@ -70,7 +77,7 @@ class OrchestratorAgent:
             if self.agent is None:
                 self.agent = self.agent_creation()
 
-            config_id : RunnableConfig = {     # type hinting to RunnableConfig
+            config_id: RunnableConfig = {  # type hinting to RunnableConfig
                 "configurable": {
                     "thread_id": "1"
                 }
@@ -91,6 +98,3 @@ class OrchestratorAgent:
                     yield chunk.content
         except Exception as e:
             logging.error(f"Error in run_query: {e}", exc_info=True)
-
-
-orchest_agent = OrchestratorAgent()
