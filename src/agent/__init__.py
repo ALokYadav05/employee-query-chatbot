@@ -1,3 +1,3 @@
-from .orchestrator import orchest_agent
+from .orchestrator import OrchestratorAgent
 
-__all__ = ['orchest_agent']
+__all__ = ['OrchestratorAgent']
