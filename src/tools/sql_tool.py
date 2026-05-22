@@ -36,33 +36,92 @@ class SQLTool:
         """
         try:
             self.toolkit = SQLDatabaseToolkit(db=self.db, llm=self.llm)
-            self.tools = self.toolkit.get_tools()
+            self.tools = {t.name: t for t in self.toolkit.get_tools()}
             logging.info("Successfully created toolkit!")
+            return self.toolkit, self.tools
         except Exception as e:
             logging.error(f"Error while creating toolkit: {e}", exc_info=True)
 
-    def sql_query_tool(self):
+    def list_tables_tool(self):
         """
-        Used to run the toolkit for SQL database interaction
+        Returns a LangChain tool that retrieves all available table names from the database.
+        Returns:
+            function: List tables tool that returns a comma-separated string of all tables in the database.
         """
         self.create_toolkit()
-
-        @tool(
-            "sql_query_tool",
-            description="Converts natural language queries into SQL and executes them on the connected database."
-        )
-        def run_sql_query(query: str):
-            """
-            Run a natural language query against the database.
-            Converts the query to SQL and returns the results
-            """
+        @tool("list_table",
+              description="Input is an empty string. Output is a list of all tables present in the database.")
+        def list_table(query: str = ""):
             try:
-                # use a generator expression to iterate and safely locate the SQL tool by its identifier
-                sql_tools = next(t for t in self.tools if t.name == "sql_db_query")
-                result = sql_tools.invoke(query)
-                logging.info("Successfully executed SQL query!")
-                return result
+                logging.info("Called list_table.")
+                res = self.tools["sql_db_list_tables"].invoke(query)
+                return res
             except Exception as e:
-                logging.error(f"Error while executing SQL query: {e}", exc_info=True)
+                logging.error(f"List tables error: {e}", exc_info=True)
+                return f"Error listing database tables: {e}"
 
-        return run_sql_query
+        return list_table
+
+    def schema_tool(self):
+        """
+        Returns a LangChain tool that fetches the schema details and sample rows for specific tables.
+        Returns:
+            function: Schema tool that fetches the schema definition and column details for requested tables.
+        """
+        self.create_toolkit()
+        @tool("db_schema",
+              description="Input is a comma-separated list of table names. "
+                          "Output is the schema definition and sample rows for those tables. "
+                          "Use this to find relevant columns before writing a query.")
+        def db_schema(tables: str):
+            try:
+                logging.info(f"Called db_schema for tables: {tables}")
+                res = self.tools["sql_db_schema"].invoke(tables)
+                return res
+            except Exception as e:
+                logging.error(f"Schema inspection error: {e}", exc_info=True)
+                return f"Error retrieving schema: {e}"
+
+        return db_schema
+
+    def query_checker_tool(self):
+        """
+        Returns a LangChain tool that validates the SQL query syntax and fixes common mistakes.
+        Returns:
+            function: Validator tool that checks the query syntax with an LLM and returns a clean SQL query.
+        """
+        self.create_toolkit()
+        @tool("query_checker",
+              description="Use this tool to validate a SQL query generated from a natural language question. ")
+        def query_checker(query: str):
+            try:
+                logging.info("Called query_checker.")
+                res = self.tools["sql_db_query_checker"].invoke({"query": query})
+                logging.info("Execution of query_checker completed successfully.")
+                return res
+            except Exception as e:
+                logging.error(f"SQL Execution Error: {e}", exc_info=True)
+                return f"Error validating query: {e}"
+
+        return query_checker
+
+    def query_executor_tool(self):
+        """
+        Returns a LangChain tool that converts natural language questions into SQL queries, executes them
+        on the database, and returns results.
+        Returns:
+            function: Execution tool that runs SQL queries against the database and returns raw records.
+        """
+        self.create_toolkit()
+        @tool("query_executor",
+              description="Input is a valid SQL SELECT query. Output is the raw text result from the database.")
+        def query_executor(query: str):
+            try:
+                logging.info("Called query_executor.")
+                res = self.tools["sql_db_query"].invoke(query)
+                logging.info("Execution of query_executor completed successfully.")
+                return res
+            except Exception as e:
+                logging.error(f"SQL Execution Error: {e}", exc_info=True)
+
+        return query_executor
