@@ -42,7 +42,8 @@ class OrchestratorAgent:
         try:
             agent = create_agent(
                 model=self.llm,
-                tools=[rag_tool.rag_query_tool(), sql_tool.sql_query_tool()],
+                tools=[rag_tool.rag_query_tool(), sql_tool.list_tables_tool(), sql_tool.schema_tool(),
+                       sql_tool.query_checker_tool(), sql_tool.query_executor_tool()],
                 system_prompt=self.prompt,
                 checkpointer=self.checkpointer,
                 middleware=[
