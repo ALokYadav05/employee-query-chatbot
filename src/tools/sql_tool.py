@@ -25,22 +25,13 @@ class SQLTool:
                 temperature=0,
                 # base_url=config.BASE_URL
             )
-            self.toolkit = None
-            self.tools = None
+            self.toolkit = SQLDatabaseToolkit(
+                db=self.db,
+                llm=self.llm
+            )
+            self.tools = {t.name: t for t in self.toolkit.get_tools()}
         except Exception as e:
             logging.error(f"Error while initializing SQL-tool class : {e}", exc_info=True)
-
-    def create_toolkit(self):
-        """
-        Used to create the toolkit for SQL database interaction
-        """
-        try:
-            self.toolkit = SQLDatabaseToolkit(db=self.db, llm=self.llm)
-            self.tools = {t.name: t for t in self.toolkit.get_tools()}
-            logging.info("Successfully created toolkit!")
-            return self.toolkit, self.tools
-        except Exception as e:
-            logging.error(f"Error while creating toolkit: {e}", exc_info=True)
 
     def list_tables_tool(self):
         """
@@ -48,7 +39,7 @@ class SQLTool:
         Returns:
             function: List tables tool that returns a comma-separated string of all tables in the database.
         """
-        self.create_toolkit()
+
         @tool("list_table",
               description="Input is an empty string. Output is a list of all tables present in the database.")
         def list_table(query: str = ""):
@@ -68,7 +59,7 @@ class SQLTool:
         Returns:
             function: Schema tool that fetches the schema definition and column details for requested tables.
         """
-        self.create_toolkit()
+
         @tool("db_schema",
               description="Input is a comma-separated list of table names. "
                           "Output is the schema definition and sample rows for those tables. "
@@ -90,7 +81,7 @@ class SQLTool:
         Returns:
             function: Validator tool that checks the query syntax with an LLM and returns a clean SQL query.
         """
-        self.create_toolkit()
+
         @tool("query_checker",
               description="Use this tool to validate a SQL query generated from a natural language question. ")
         def query_checker(query: str):
@@ -112,7 +103,7 @@ class SQLTool:
         Returns:
             function: Execution tool that runs SQL queries against the database and returns raw records.
         """
-        self.create_toolkit()
+
         @tool("query_executor",
               description="Input is a valid SQL SELECT query. Output is the raw text result from the database.")
         def query_executor(query: str):
