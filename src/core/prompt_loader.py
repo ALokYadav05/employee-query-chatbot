@@ -11,7 +11,7 @@ class PromptLoader:
     """
 
     def __init__(self):
-        self.file_path = f"{config.BASE_DIR}/src/prompts/system_prompt.md"
+        self.file_path = config.PROMPT_TEMPLATE_PATH
 
     def load_prompt(self) -> str | None:
         """
