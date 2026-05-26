@@ -7,7 +7,9 @@ API_URL = Config().API_URL
 
 
 def fetch_sessions():
-    """Fetches sessions from the backend securely."""
+    """
+    Gets all chat sessions from the backend API.
+    """
     try:
         resp = requests.get(f"{API_URL}/sessions")
         if resp.status_code == 200:
@@ -18,6 +20,9 @@ def fetch_sessions():
 
 
 def create_session(title="New Chat"):
+    """
+    Creates a new chat session on the backend.
+    """
     try:
         resp = requests.post(f"{API_URL}/sessions", json={"title": title})
         if resp.status_code == 201:
@@ -28,6 +33,9 @@ def create_session(title="New Chat"):
 
 
 def delete_session(session_id):
+    """
+    Deletes a specific chat session by its ID.
+    """
     try:
         resp = requests.delete(f"{API_URL}/sessions/{session_id}")
         return resp.status_code == 200
@@ -37,6 +45,9 @@ def delete_session(session_id):
 
 
 def rename_session(session_id, new_title):
+    """
+    Changes the title of an existing chat session.
+    """
     try:
         resp = requests.patch(f"{API_URL}/sessions/{session_id}", json={"title": new_title})
         return resp.status_code == 200
@@ -47,6 +58,9 @@ def rename_session(session_id, new_title):
 
 @st.dialog("Rename Chat")
 def rename_dialog(chat_id, current_title):
+    """
+    Displays a popup dialog box to rename a chat session.
+    """
     new_title = st.text_input("Enter new chat title:", value=current_title)
     col1, col2 = st.columns([1, 1])
     with col1:
@@ -65,6 +79,9 @@ def rename_dialog(chat_id, current_title):
 
 
 def user_interface():
+    """
+    Builds and runs the entire Streamlit chat application UI.
+    """
     # Page Configuration
     st.set_page_config(page_title="AI Employee Assistant", page_icon="🤖", layout="centered")
 
@@ -79,7 +96,7 @@ def user_interface():
         unsafe_allow_html=True,
     )
 
-    # Initialize State Variables via State Checking (Runs once)
+    # Initialize State Variables via State Checking
     if "chat_list" not in st.session_state:
         st.session_state.chat_list = fetch_sessions()
     if "current_chat_id" not in st.session_state:
@@ -87,7 +104,7 @@ def user_interface():
 
     # Sidebar Rendering
     with st.sidebar:
-        st.title("Chats")
+        st.title("Chats", help="Your conversation history", width="content")
 
         if st.button("New Chat", use_container_width=True, icon="➕"):
             st.session_state.current_chat_id = None
