@@ -132,7 +132,7 @@ def user_interface():
             with col_del:
                 if st.button("🗑️", key=f"del_{chat_id}", help="Delete Chat", use_container_width=True):
                     if delete_session(chat_id):
-                        # OPTIMIZATION: Mutate local memory index state instantly
+                        # Mutate local memory index state instantly
                         st.session_state.chat_list = [c for c in st.session_state.chat_list if c["id"] != chat_id]
                         if st.session_state.current_chat_id == chat_id:
                             st.session_state.current_chat_id = None
@@ -177,7 +177,8 @@ def user_interface():
             if new_sess:
                 st.session_state.current_chat_id = new_sess["id"]
                 # Insert directly to local state cache to avoid reloading
-                st.session_state.chat_list.insert(0, {"id": new_sess["id"], "title": prompt, "messages": []})
+                st.session_state.chat_list.insert(0,
+                                                  {"id": new_sess["id"], "title": prompt, "messages": []})
 
         # Render input block to user immediately
         with st.chat_message("user", avatar="👤"):
@@ -188,7 +189,7 @@ def user_interface():
             placeholder = st.empty()
             full_response = ""
 
-            with st.spinner("🤔 Thinking..."):  # type: ignore
+            with st.spinner(" Thinking..."):  # type: ignore
                 try:
                     stream_url = f"{API_URL}/chat/{st.session_state.current_chat_id}"
                     with requests.post(stream_url, json={"query": prompt}, stream=True) as response:
