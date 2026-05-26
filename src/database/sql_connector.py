@@ -39,14 +39,3 @@ class SQLDatabaseConn:
             logging.error(f"SQL Connection Error: {e}", exc_info=True)
         except Exception as e:
             logging.error(f"SQL Connection Error: {e}", exc_info=True)
-
-    def dispose(self):
-        """
-        Dispose of the engine cleanly.
-        """
-        try:
-            if self.engine:
-                # Dispose engine to release database connections
-                self.engine.dispose()
-        except Exception as e:
-            logging.error(f"Dispose Error: {e}", exc_info=True)
