@@ -45,16 +45,6 @@ class CreateSessionResponse(BaseModel):
     title: str
 
 
-class MessageModel(BaseModel):
-    """
-    Data model for a single structured chat message within a session.
-    Attributes: role (str): The author of the message (e.g., 'user', 'assistant', 'system').
-                content (str): The textual body of the message.
-    """
-    role: str
-    content: str
-
-
 class UpdateSessionRequest(BaseModel):
     """
     Data model for updating metadata of an existing session.
@@ -194,24 +184,6 @@ def delete_session(session_id: str):
         return {"status": "deleted", "id": session_id}
     except Exception as e:
         logging.error(f"Delete Session Error: {e}", exc_info=True)
-
-
-@app.post("/sessions/{session_id}/messages", status_code=status.HTTP_201_CREATED)
-def append_message(session_id: str, message: MessageModel):
-    """
-    Manually append a single message to a session's history.
-    """
-    try:
-        new_message = {"role": message.role, "content": message.content}
-        result = sessions_collection.update_one(
-            {"_id": session_id},
-            {"$push": {"messages": new_message}}
-        )
-        if result.matched_count == 0:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Session not found")
-        return {"status": "ok"}
-    except Exception as e:
-        logging.error(f"Append Message Error: {e}", exc_info=True)
 
 
 @app.patch("/sessions/{session_id}", status_code=status.HTTP_200_OK)
