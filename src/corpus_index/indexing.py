@@ -7,6 +7,7 @@ import logging
 
 config = Config()
 
+
 class IndexingPipeline:
     """ RAG-Pipeline for Indexing documents"""
 
@@ -14,18 +15,15 @@ class IndexingPipeline:
         try:
             self.BASE_DIR = config.BASE_DIR
             self.EMBEDDING_MODEL = config.EMBEDDING_MODEL
-            self.files = [f"{self.BASE_DIR}/data/HR_Policies_Handbook.docx",
-                          f"{self.BASE_DIR}/data/Role_Documents_Handbook.docx"]
+            self.files = [config.HR_POLICIES_PATH, config.ROLE_DOCS_PATH]
 
             self.splitter = RecursiveCharacterTextSplitter(
-                chunk_size=800,
+                chunk_size=1000,
                 chunk_overlap=200
             )
-
             self.all_chunks = []
-
             self.embedding = OllamaEmbeddings(
-                base_url=config.BASE_URL,
+                # base_url=config.BASE_URL,
                 model=self.EMBEDDING_MODEL
             )
         except Exception as e:
@@ -92,5 +90,5 @@ class IndexingPipeline:
             logging.error(f"Error occurred while running pipeline : {e}", exc_info=True)
 
 
-rag_index = IndexingPipeline()   # Initializing here, because it is standalone file
+rag_index = IndexingPipeline()  # Initializing here, because it is standalone file
 rag_index.run_pipeline()
