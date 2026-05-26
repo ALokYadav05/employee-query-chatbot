@@ -2017,20 +2017,20 @@ ormsgpack = ">=1.12.0"
 
 [[package]]
 name = "langgraph-checkpoint-mongodb"
-version = "0.3.1"
+version = "0.4.0"
 description = "Library with a MongoDB implementation of LangGraph checkpoint saver."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "langgraph_checkpoint_mongodb-0.3.1-py3-none-any.whl", hash = "sha256:c17fc1f3ff89fd93abdcae9b69d9050bca7b2f2b965207b303d3b174f82dae98"},
-    {file = "langgraph_checkpoint_mongodb-0.3.1.tar.gz", hash = "sha256:ea174e652a13dd7172a0cd925f3023b796b01586533d2dc52f05873e4c34141b"},
+    {file = "langgraph_checkpoint_mongodb-0.4.0-py3-none-any.whl", hash = "sha256:f7da2d48cf6adac7c169d88bd70f94358f9f7debdc0cb53b93c417250f589823"},
+    {file = "langgraph_checkpoint_mongodb-0.4.0.tar.gz", hash = "sha256:21833db58637993b2e4f989d96093cd23f41d13f17b697a12a17f87ad6d987a4"},
 ]
 
 [package.dependencies]
 langchain-mongodb = ">=0.8.0"
 langgraph-checkpoint = ">=3.0.0"
-pymongo = ">=4.12,<4.16"
+pymongo = ">=4.12,<4.17"
 
 [[package]]
 name = "langgraph-prebuilt"
@@ -6962,4 +6962,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "434224a00671b95990b6ffa8893ccc9961fa5bc6453d1ba1d75d48f84158256d"
+content-hash = "129cab571972c1a9db4769f45fd964c1af99c8c6de2dcc963fde8e6f5af2d297"
