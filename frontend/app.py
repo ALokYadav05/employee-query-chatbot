@@ -151,7 +151,7 @@ def user_interface():
     welcome_placeholder = st.empty()
     if not messages:
         with welcome_placeholder.container():
-            st.markdown("### Welcome, Alok!")
+            st.markdown("### Welcome !")
             st.info("I'm your AI assistant. You can ask me about company policies, Employee related details etc.")
 
     # Render Historical Log Nodes Instantly
@@ -210,9 +210,6 @@ def user_interface():
 
             if full_response:
                 placeholder.markdown(full_response)
-
-        # rerun layout configuration to update text logs natively
-        st.rerun()
 
 
 if __name__ == "__main__":
