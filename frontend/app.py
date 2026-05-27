@@ -67,7 +67,7 @@ def rename_dialog(chat_id, current_title):
         if st.button("Save", use_container_width=True, type="primary"):
             cleaned_title = new_title.strip()
             if cleaned_title and rename_session(chat_id, cleaned_title):
-                # OPTIMIZATION: Update local memory state instantly instead of blocking API calls
+                # Update local memory state instantly instead of blocking API calls
                 for chat in st.session_state.chat_list:
                     if chat["id"] == chat_id:
                         chat["title"] = cleaned_title
@@ -108,7 +108,6 @@ def user_interface():
 
         if st.button("New Chat", use_container_width=True, icon="➕"):
             st.session_state.current_chat_id = None
-            st.rerun()
 
         st.divider()
 
@@ -211,6 +210,8 @@ def user_interface():
             if full_response:
                 placeholder.markdown(full_response)
 
+        # rerun layout configuration to update text logs natively
+        st.rerun()
 
 if __name__ == "__main__":
     user_interface()
