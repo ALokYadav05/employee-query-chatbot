@@ -2,6 +2,7 @@ import json
 import streamlit as st
 import requests
 from src import Config
+import time
 
 API_URL = Config().API_URL
 
@@ -38,7 +39,10 @@ def delete_session(session_id):
     """
     try:
         resp = requests.delete(f"{API_URL}/sessions/{session_id}")
-        return resp.status_code == 200
+        if resp.status_code == 200:
+            return "success"
+        else:
+            return "server_error"
     except Exception as e:
         st.error(f"Failed to delete session: {e}")
     return False
@@ -72,11 +76,47 @@ def rename_dialog(chat_id, current_title):
                     if chat["id"] == chat_id:
                         chat["title"] = cleaned_title
                         break
+                st.toast("Successfully renamed chat!", icon="✅")
+                time.sleep(1)
                 st.rerun()
     with col2:
         if st.button("Cancel", use_container_width=True):
             st.rerun()
 
+
+@st.dialog("Confirm Deletion")
+def confirm_delete_dialog(chat_id):
+    """
+    Displays a popup dialog box to confirm deletion of a chat session.
+    """
+    st.write("⚠️ Are you sure you want to delete this chat? This action cannot be undone.")
+    col_yes, col_no = st.columns(2)
+
+    with col_yes:
+        if st.button("Yes, Delete", type="primary", use_container_width=True):
+            status = delete_session(chat_id)
+
+            if status == "success":
+                # Update local state instantly
+                st.session_state.chat_list = [c for c in st.session_state.chat_list if c["id"] != chat_id]
+                if st.session_state.current_chat_id == chat_id:
+                    st.session_state.current_chat_id = None
+
+                st.toast("Chat deleted successfully!", icon="✅")
+                time.sleep(0.5)
+                st.rerun()
+
+            elif status == "server_error":
+                st.toast("Failed to delete chat: Server error.", icon="❌")
+                st.rerun()
+
+            elif status == "network_error":
+                st.toast("Failed to delete chat: Connection lost.", icon="⚠️")
+                st.rerun()
+
+    with col_no:
+        if st.button("Cancel", use_container_width=True):
+            st.rerun()
 
 def user_interface():
     """
@@ -104,14 +144,28 @@ def user_interface():
 
     # Sidebar Rendering
     with st.sidebar:
-        st.title("Chats", help="Your conversation history", width="content")
+        st.title("Chats", help="Your conversation history")
 
+        # Clicking "New Chat" now commits to the database instantly
         if st.button("New Chat", use_container_width=True, icon="➕"):
-            st.session_state.current_chat_id = None
+            new_sess = create_session(title="New Chat")
+            if new_sess:
+                # Update the active chat reference
+                st.session_state.current_chat_id = new_sess["id"]
+
+                # Insert at the top of the local state cache array
+                st.session_state.chat_list.insert(0, {
+                    "id": new_sess["id"],
+                    "title": "New Chat",
+                    "messages": []
+                })
+
+                # Toast and refresh to show the new item instantly
+                st.toast("Created new chat!", icon="✨")
+                time.sleep(0.3)
+                st.rerun()
 
         st.divider()
-
-        # Display list from state cache
         for chat in st.session_state.chat_list:
             chat_id = chat["id"]
             title = chat.get("title", "New Chat")
@@ -120,7 +174,12 @@ def user_interface():
             col_btn, col_ren, col_del = st.columns([0.76, 0.13, 0.17], gap="small")
 
             with col_btn:
-                if st.button(chat_preview, use_container_width=True, key=f"chat_{chat_id}"):
+                # Visual indicator for active chat item selection
+                is_active = (st.session_state.current_chat_id == chat_id)
+                btn_type = "primary" if is_active else "secondary"
+
+                if st.button(chat_preview, use_container_width=True, key=f"chat_{chat_id}",
+                             type=btn_type):  # type:ignore
                     st.session_state.current_chat_id = chat_id
                     st.rerun()
 
@@ -130,12 +189,8 @@ def user_interface():
 
             with col_del:
                 if st.button("🗑️", key=f"del_{chat_id}", help="Delete Chat", use_container_width=True):
-                    if delete_session(chat_id):
-                        # Mutate local memory index state instantly
-                        st.session_state.chat_list = [c for c in st.session_state.chat_list if c["id"] != chat_id]
-                        if st.session_state.current_chat_id == chat_id:
-                            st.session_state.current_chat_id = None
-                        st.rerun()
+                    confirm_delete_dialog(chat_id)
+
 
     st.title("AI Employee Assistant", text_alignment="center")
 
@@ -164,20 +219,34 @@ def user_interface():
             st.markdown(content)
 
     # Input Stream Handling Logic
-    prompt = st.chat_input("How can I help you today?")
+    prompt = st.chat_input("How can I help you today?", max_chars=1000)
 
     if prompt:
+        if len(prompt) > 1000:
+            st.toast("Max input character limit exceeded!", icon="⚠️")
+            st.stop()
+
         welcome_placeholder.empty()
 
-        # Handle initialization lazily inline
-        is_new_chat = st.session_state.current_chat_id is None
-        if is_new_chat:
-            new_sess = create_session(title=prompt)
+        # Create a session if none is selected
+        if st.session_state.current_chat_id is None:
+            new_sess = create_session(title="New Chat")
             if new_sess:
                 st.session_state.current_chat_id = new_sess["id"]
-                # Insert directly to local state cache to avoid reloading
-                st.session_state.chat_list.insert(0,
-                                                  {"id": new_sess["id"], "title": prompt, "messages": []})
+                st.session_state.chat_list.insert(
+                    0,
+                    {"id": new_sess["id"], "title": "New Chat", "messages": []}
+                )
+
+        current_chat = next((c for c in st.session_state.chat_list if c["id"] == st.session_state.current_chat_id),
+                            None)
+        if current_chat and current_chat.get("title") == "New Chat":
+            generated_title = prompt[:15] + "..." if len(prompt) > 15 else prompt
+
+            # Update the database title via your existing API function
+            if rename_session(st.session_state.current_chat_id, generated_title):
+                # Update the local UI memory state instantly
+                current_chat["title"] = generated_title
 
         # Render input block to user immediately
         with st.chat_message("user", avatar="👤"):
@@ -188,7 +257,7 @@ def user_interface():
             placeholder = st.empty()
             full_response = ""
 
-            with st.spinner(" Thinking..."):  # type: ignore
+            with st.spinner(" Thinking..."):   #type: ignore
                 try:
                     stream_url = f"{API_URL}/chat/{st.session_state.current_chat_id}"
                     with requests.post(stream_url, json={"query": prompt}, stream=True) as response:
