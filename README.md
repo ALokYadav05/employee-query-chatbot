@@ -32,12 +32,14 @@ Simply ask a question, and the chatbot will find the answer from HR policies, ro
 
 ##  Key Features
 
- **Smart Query Understanding** - Automatically determines if your question needs document lookup or database search  
- **Document Search (RAG)** - Retrieves information from HR policies and role handbooks  
- **Database Query (NL2SQL)** - Converts natural language questions into SQL queries  
- **Real-time Streaming** - Get responses as they're generated, not after processing  
- **Easy Web Interface** - User-friendly Streamlit dashboard  
- **Local & Private** - Runs locally using Ollama, no external API calls needed  
+* **Smart Query Understanding** - Automatically determines if your question needs document lookup or database search.
+* **Document Search (RAG)** - Retrieves information from HR policies and role handbooks.
+* **Database Query (NL2SQL)** - Converts natural language questions into SQL queries.
+* **Real-time Streaming** - Get responses as they're generated, not after processing.
+* **Easy Web Interface** - User-friendly Streamlit dashboard.
+* **Multi-Chat Session Management** - Create, maintain, and switch between multiple distinct chat sessions seamlessly.
+* **Session Control** - Easily rename or delete chat sessions to keep your conversations organized.
+* **Local & Private** - Runs locally using Ollama, no external API calls needed.
 
 ---
 
