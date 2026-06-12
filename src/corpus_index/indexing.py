@@ -23,7 +23,7 @@ class IndexingPipeline:
             )
             self.all_chunks = []
             self.embedding = OllamaEmbeddings(
-                # base_url=config.BASE_URL,
+                base_url=config.BASE_URL,
                 model=self.EMBEDDING_MODEL
             )
         except Exception as e:
@@ -70,7 +70,7 @@ class IndexingPipeline:
             store = Chroma.from_documents(
                 documents=self.all_chunks,
                 embedding=self.embedding,
-                persist_directory=f"{self.BASE_DIR}/chromaDB",  # store Chromadb folder in root
+                persist_directory="/app/chromaDB",  # store Chromadb folder in root
             )
             logging.info("Stored embeddings successfully!")
             return store
