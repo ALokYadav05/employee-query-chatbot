@@ -15,14 +15,14 @@ class RagTool:
 
             # Initialize embedding model
             self.embedding = OllamaEmbeddings(
-                # base_url=config.BASE_URL,
+                base_url=config.BASE_URL,
                 model=self.embeddings_model
             )
 
             # Initialize vector store
             self.vector_store = Chroma(
                 embedding_function=self.embedding,
-                persist_directory=f"{self.base_dir}/chromaDB",
+                persist_directory="/app/chromaDB",
             )
 
             logging.info("RAGTool initialized successfully with Chroma vector store.")
