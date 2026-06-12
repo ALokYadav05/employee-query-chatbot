@@ -29,7 +29,7 @@ class OrchestratorAgent:
         self.llm = ChatOllama(
             model=config.GEMMA_CLOUD_MODEL,
             temperature=0.3,
-            # base_url=config.BASE_URL
+            base_url=config.BASE_URL
         )
         self.prompt = prompt_loader.load_prompt()
         self.checkpointer = mongo_db.get_saver()
