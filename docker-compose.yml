@@ -1,0 +1,71 @@
+# Multi-container setup for AI Employee Query Chatbot
+services:
+
+  # Main application container
+  app:
+    image: ak1469/ai-employee-chatbot:v2
+    container_name: employee-chatbot
+
+    # Expose backend and frontend ports
+    ports:
+      - "8000:8000"
+      - "8501:8501"
+
+    # Load application configuration and secrets
+    env_file:
+      - .env
+
+    # Persist source documents and ChromaDB vector store
+    volumes:
+      - ./data:/app/data
+      - ./chromaDB:/app/chromaDB
+
+    # Start below services before the application
+    depends_on:
+      - mongodb
+      - mssql
+      - ollama
+
+  # Stores chat history and application data
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+
+    # Persist MongoDB data across container recreations
+    volumes:
+      - mongo_data:/data/db
+
+  # SQL Server database used for NL2SQL queries
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    container_name: mssql
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+    ports:
+      - "1433:1433"
+
+    # Persist database files and enable backup access
+    volumes:
+      - mssql_data:/var/opt/mssql
+      - C:/Backups:/backup
+
+  # Local LLM server hosting embedding and chat models
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+
+    # Persist downloaded models to avoid re-pulling
+    volumes:
+      - ollama_data:/root/.ollama
+
+
+# Named Docker volumes for persistent storage
+volumes:
+  mongo_data:
+  mssql_data:
+  ollama_data:
