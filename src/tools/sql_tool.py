@@ -23,7 +23,7 @@ class SQLTool:
             self.llm = ChatOllama(
                 model=config.GEMMA_CLOUD_MODEL,
                 temperature=0,
-                # base_url=config.BASE_URL
+                base_url=config.BASE_URL
             )
             self.toolkit = SQLDatabaseToolkit(
                 db=self.db,
