@@ -13,12 +13,14 @@
 - [Prerequisites](#-prerequisites)
 - [Project Structure](#-project-structure)
 - [How It Works](#-how-it-works)
+- [Docker Deployment](#-docker-deployment)
 
 ---
 
 ## Overview
 
-**AI Intelligent Employee Query Chatbot** is a smart assistant that answers employee-related questions by intelligently combining document-based knowledge with database queries. It uses advanced AI technologies including:
+**AI Intelligent Employee Query Chatbot** is a smart assistant that answers employee-related questions by 
+  intelligently combining document-based knowledge with database queries. It uses advanced AI technologies including:
 
 - **LangChain** - For orchestrating AI workflows and tool execution
 - **Ollama** - For running local language models
@@ -40,24 +42,26 @@ Simply ask a question, and the chatbot will find the answer from HR policies, ro
 * **Real-time Streaming** - Get responses as they're generated, not after processing.
 * **Easy Web Interface** - User-friendly Streamlit dashboard featuring a chat history sidebar.
 * **Local & Private** - Runs locally using Ollama, no external API calls needed.
-
----
+* **Containerized** - The application is fully containerized using a Dockerfile and Docker Compose for
+   seamless multiservice deployment (FastAPI, MongoDB, MSSQL, and Ollama).
 
 ## Project Architecture & Tools
 
-The system uses an **Orchestrator Agent** powered by LangChain to intelligently route user queries to the correct tool based on context.
+The system uses an **Orchestrator Agent** powered by LangChain to intelligently route user queries to the 
+correct tool based on context.
 
 ### 1. RAG Retriever Tool
 * Used when questions relate to text documents (e.g., HR Policies, company handbooks).
 * Queries **ChromaDB** using vector embeddings to find semantic matches and provide contextual answers.
 
 ### 2. SQL Tool (NL2SQL Engine)
-Used when questions require data from structured tables. The agent relies on **4 specialized LangChain tools** to safely and accurately build and execute database queries:
+Used when questions require data from structured tables. The agent relies on **4 specialized LangChain tools** 
+to safely and accurately build and execute database queries:
 
 
 | Tool Name | Input | Description |
 | :--- | :--- | :--- |
-| **`sql_db_list_tables`** | Empty string (`""`) | Returns a comma-separated list of all tables present in the database. |
+| **`sql_db_list_tables`** | Empty string (`""`) | Returns a comma-separated list of all tables present in the<br/> database. |
 | **`sql_db_schema`** | Comma-separated tables | Returns the precise schema definition and sample rows for the specified tables. |
 | **`sql_db_query_checker`** | SQL query string | Validates syntax and structure to prevent errors **before** code execution. |
 | **`sql_db_query`** | Verified SQL query string | Executes the query and returns raw data. Handles fallback logic if columns are missing. |
@@ -66,7 +70,8 @@ Used when questions require data from structured tables. The agent relies on **4
 
 ## API Endpoints
 
-The FastAPI backend exposes the following endpoints to handle both streaming chat generation and multi-session CRUD management:
+The FastAPI backend exposes the following endpoints to handle both streaming chat generation and multi-session 
+CRUD management:
 
 ### Chat Execution
 * `POST /chat/{session_id}` - Send a message to a specific chat session and receive a streaming response.
@@ -82,26 +87,99 @@ The FastAPI backend exposes the following endpoints to handle both streaming cha
 
 ## Quick Start
 
-Get the chatbot running in 5 minutes:
+Run the full AI Employee Query Chatbot using Docker Compose.
+
+
+### 1. Clone the Repository
 
 ```bash
-# 1. Clone the repository
 git clone https://github.com/ALokYadav05/Employee_Intelligent_Chatbot.git
 cd Employee_Intelligent_Chatbot
-
-# 2. Install dependencies
-poetry install
-
-# 3. Start Ollama (in a new terminal)
-ollama serve
-
-# 4. In another terminal, start the API
-poetry shell
-uvicorn app:app --reload --host 0.0.0.0 --port 8000
-
-# 5. In a third terminal, start the web interface
-streamlit run frontend/app.py
 ```
+
+### 2. Build Application Image
+
+```bash
+docker build -t ai-employee-chatbot .
+```
+
+### 3. Pull Required Service Images
+
+```bash
+docker pull mongo:latest
+docker pull mcr.microsoft.com/mssql/server:2025-latest
+docker pull ollama/ollama:latest
+```
+
+### 4. Start All Services
+
+```bash
+docker compose up -d
+```
+
+This will start:
+
+- Application (FastAPI + Streamlit)
+- MongoDB
+- MSSQL Server
+- Ollama
+
+### 5. Verify Containers
+
+```bash
+docker ps
+```
+
+## First-Time Initialization (Required Once)
+
+### 6. Create MSSQL Database
+
+```bash
+docker exec -it mssql bash
+```
+
+```bash
+/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P <password> -C
+```
+
+```sql
+CREATE DATABASE employeeDBMaster;
+GO
+```
+
+### 7. Pull Ollama Models
+
+```bash
+docker exec -it ollama bash
+```
+
+```bash
+ollama pull mxbai-embed-large
+ollama pull sqlcoder:15b
+ollama pull mistral-nemo
+ollama pull qwen3:4b
+```
+
+### 8. Build ChromaDB Index
+
+```bash
+docker exec -it employee-chatbot bash
+```
+
+```bash
+python -m src.corpus_index.indexing
+```
+
+### 9. Restart Application Container
+
+```bash
+docker restart employee-chatbot
+```
+
+### 10. Access Application
+
+- FastAPI → http://localhost:8000  
+- Streamlit → http://localhost:8501
 
 Open `http://localhost:8501` in your browser and start asking questions! 
 
@@ -130,6 +208,9 @@ Employee_Intelligent_Chatbot/
 ├──  pyproject.toml            # Project configuration & dependencies
 ├──  poetry.lock               # Locked dependency versions
 ├──  .env                      # Environment configuration
+├──  requirements.txt          # all dependency
+├──  Dockerfile                # docker file for application image 
+├──  docker-compose.yml        # multi-container setup
 │
 ├── frontend/
 │   └── app.py                   # Web interface (Streamlit)
